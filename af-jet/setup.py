@@ -1,23 +1,20 @@
-import numpy as np
-import pandas as pd
-from scipy.special import softmax
+import os
 import re
 import time
-import matplotlib.pyplot as plt
-import tensorflow as tf
-import os
 import warnings
-from colabdesign import mk_afdesign_model, clear_mem
-from colabdesign.shared.utils import copy_dict
-from colabdesign.af.alphafold.common import residue_constants
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import tensorflow as tf
+from scipy.special import softmax
+from utils import parse_indices
+
+from colabdesign import clear_mem, mk_afdesign_model
+from colabdesign.af.alphafold.common import residue_constants
+from colabdesign.shared.utils import copy_dict
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-# Enable determinism
-tf.keras.utils.set_random_seed(1)
-tf.config.experimental.enable_op_determinism()
 
 
 #########################
@@ -60,10 +57,12 @@ def add_cyclic_offset(self, bug_fix=True):
     offset[self._target_len:,self._target_len:] = c_offset
   self._inputs["offset"] = offset
 
+  return self
+
 ###########################
 #define helper functions
 ###########################
-def af_cyclic_setup(pdb_name, target_chain,binder_len,target_hotspot,use_multimer,target_flexible):
+def AF_cyclic_setup(pdb_name, target_chain,binder_len,target_hotspot,use_multimer,target_flexiblem, num_recycles=0):
 
   #target info
   pdb = pdb_name
@@ -96,15 +95,35 @@ def af_cyclic_setup(pdb_name, target_chain,binder_len,target_hotspot,use_multime
     print("binder length:", model._binder_len)
     binder_len = model._binder_len
 
-  # Set cyclic offset
-  if cyclic_offset:
-    if bugfix:
-        print("Set bug fixed cyclic peptide complex offset. The cyclic peptide binder will be hallucionated.")
-        add_cyclic_offset(model, bug_fix=True)
-    else:
-        print("Set not bug fixed cyclic peptide complex offset. The cyclic peptide binder will be hallucionated.")
-        add_cyclic_offset(model, bug_fix=False)
-  else:
-    print("Don't set cyclic offset. The linear peptide binder will be hallucionated.")
-
   return model
+
+
+# modify cyclic offset with repulsion in embedding
+def add_cyclic_offset_w_interaction(self, bug_fix=True,r_index = "", a_index = ""):
+  '''add cyclic offset to connect N and C term'''
+  def cyclic_offset(L):
+    i = np.arange(L)
+    ij = np.stack([i,i+L],-1)
+    offset = i[:,None] - i[None,:]
+    c_offset = np.abs(ij[:,None,:,None] - ij[None,:,None,:]).min((2,3))
+    if bug_fix:
+      a = c_offset < np.abs(offset)
+      c_offset[a] = -c_offset[a]
+    return c_offset * np.sign(offset)
+  idx = self._inputs["residue_index"]
+  offset = np.array(idx[:,None] - idx[None,:])
+
+  if self.protocol == "binder":
+    c_offset = cyclic_offset(self._binder_len)
+    offset[self._target_len:,self._target_len:] = c_offset
+    if r_index != "":
+      indices = parse_indices(r_index)
+      offset[self._target_len:,indices] = -self._target_len
+      offset[indices,self._target_len:] = -self._target_len
+    if a_index != "":
+      indices = parse_indices(a_index)
+      offset[self._target_len:,indices] = 1
+      offset[indices,self._target_len:] = 1
+  self._inputs["offset"] = offset
+
+  return self
