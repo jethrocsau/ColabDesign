@@ -1,29 +1,4 @@
-# ColabDesign
-### Making Protein Design accessible to all via Google Colab! 
-- P(structure | sequence)
-  - [TrDesign](/tr) - using TrRosetta for design
-  - [AfDesign](/af) - using AlphaFold for design
-  - [WIP] [RfDesign](https://github.com/RosettaCommons/RFDesign) - using RoseTTAFold for design
-- P(sequence | structure)
-  - [ProteinMPNN](/mpnn)
-  - [WIP] TrMRF
-- P(sequence)
-  - [WIP] [MSA_transformer](/esm_msa)
-  - [WIP] [SEQ](/seq) - (GREMLIN, mfDCA, arDCA, plmDCA, bmDCA, etc)
-- P(structure)
-  - [Rfdiffusion](/rf)
+# Cyclic Design for Independent Research by Jethro Au (HKUST)
 
-### Where can I chat with other ColabDesign users?
-  - See our [Discord](https://discord.gg/gna8maru7d) channel!
-
-
-### Presentations
-[Slides](https://docs.google.com/presentation/d/1Zy7lf_LBK0_G3e7YQLSPP5aj_-AR5I131fTsxJrLdg4/)
-[Talk](https://www.youtube.com/watch?v=2HmXwlKWMVs)
-
-### Contributors:
-- Sergey Ovchinnikov [@sokrypton](https://github.com/sokrypton)
-- Shihao Feng [@JeffSHF](https://github.com/JeffSHF)
-- Justas Dauparas [@dauparas](https://github.com/dauparas)
-- Weikun.Wu [@guyujun](https://github.com/guyujun) (from [Levinthal.bio](http://levinthal.bio/en/))
-- Christopher Frank [@chris-kafka](https://github.com/chris-kafka)
+### Abstract
+This independent research study conducted a series of investigations to enhance the precision of cyclic peptide generation targeting the HIV gp120 trimer. The methods included proximity mapping to focus on the CD4 binding site, centroid distance penalization, generative loss tuning, and the development of custom generative functions. By synthesizing these findings, a novel methodology was implemented to generate candidate cyclic peptides of varying lengths. This process successfully produced cyclic peptides that resemble the crystal structure of CD4 attachment inhibitor (BMS-818251 molecule). This new methodology demonstrated improved control and precision in the generation of compounds, thereby enhancing the applicability of AlphaFold in the drug discovery process.
